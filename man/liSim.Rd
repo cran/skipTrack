@@ -4,7 +4,7 @@
 \alias{liSim}
 \title{Simulate user tracked menstrual cycle data for an individual using the li model.}
 \usage{
-liSim(i, skipProb, maxCycles, trueBetas, trueGammas = NULL)
+liSim(i, skipProb, maxCycles, trueBetas, trueGammas = NULL, avgCyclesPer)
 }
 \arguments{
 \item{i}{Individual identifier. Character, numeric or integer.}
@@ -16,6 +16,8 @@ liSim(i, skipProb, maxCycles, trueBetas, trueGammas = NULL)
 \item{trueBetas}{Optional. True values for generated mean regression coefficients.}
 
 \item{trueGammas}{NULL, left for consistency. Will throw error if specified.}
+
+\item{avgCyclesPer}{Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.}
 }
 \value{
 \describe{

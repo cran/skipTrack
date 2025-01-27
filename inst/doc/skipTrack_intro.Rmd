@@ -16,8 +16,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-
-set.seed(1)
 ```
 
 # Model Overview
@@ -71,6 +69,8 @@ library(skipTrack)
 First, we simulate data on 100 individuals from the SkipTrack model where each observed $y_{ij}$ value has a 75% probability of being a true cycle, a 20% probability of being two true cycles recorded as one, and a 5% probability of being three true cycles recorded as one. 
 
 ```{r}
+set.seed(1)
+
 #Simulate data
 dat <- skipTrack.simulate(n = 100, model = 'skipTrack', skipProb = c(.75, .2, .05))
 
@@ -134,11 +134,29 @@ plot(ft)
 
 A summary is available for the SkipTrack model fit with `summary(ft)`, with more detailed results accessible through `skipTrack.results(ft)`. Importantly, these results are based on a default chain burn-in value of 750 draws. This can be changed using the parameter `burnIn` for either function.
 
-```{r}
+For example using `summary` with the default burnIn...
+```{r, eval=FALSE}
 summary(ft)
+```
 
+produces the following output:
+
+```{r, echo = FALSE}
+summary(ft)
+```
+
+On the other hand if we change the burnIn to 500...
+
+```{r, eval = FALSE}
 summary(ft, burnIn = 500)
 ```
+
+we see:
+
+```{r, echo = FALSE}
+summary(ft, burnIn = 500)
+```
+
 
 This introduction provides enough information to start fitting the SkipTrack model. For further information regarding different methods of simulating data, additional model fitting, and tuning parameters for fitting the model, please see the help pages. Additional vignettes are forthcoming.
 

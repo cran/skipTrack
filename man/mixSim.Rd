@@ -4,7 +4,7 @@
 \alias{mixSim}
 \title{Simulate user tracked menstrual cycle data for an individual using the mixture model.}
 \usage{
-mixSim(i, skipProb, maxCycles, trueBetas, trueGammas, overlap)
+mixSim(i, skipProb, maxCycles, trueBetas, trueGammas, overlap, avgCyclesPer)
 }
 \arguments{
 \item{i}{Individual identifier. Character, numeric, or integer.}
@@ -20,6 +20,8 @@ will contain 2 true cycles, and 10\% will contain 3 true cycles.}
 \item{trueGammas}{Optional. True values for the generated precision regression coefficients.}
 
 \item{overlap}{Optional. Number of (non-intercept) columns shared between X and Z. Columns are shared from left to right.}
+
+\item{avgCyclesPer}{Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.}
 }
 \value{
 \describe{

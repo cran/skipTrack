@@ -11,7 +11,8 @@ skipTrack.simulate(
   maxCycles = length(skipProb),
   trueBetas = NULL,
   trueGammas = NULL,
-  overlap = 0
+  overlap = 0,
+  avgCyclesPer = 7
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ If model == 'li', this must be specified; if model == 'skipTrack' or 'mixture', 
 \item{trueGammas}{Optional. True values for the precision regression coefficients (not counting intercept which is automatic based on the model). Precision covariates not available for model == 'li'.}
 
 \item{overlap}{Optional. Number of (non-intercept) columns shared between X and Z. Columns are shared from left to right.}
+
+\item{avgCyclesPer}{Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.}
 }
 \value{
 A list containing:

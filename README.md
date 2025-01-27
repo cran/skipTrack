@@ -12,17 +12,19 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/LukeDuttweiler/skipTrack/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/LukeDuttweiler/skipTrack/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/skipTrack)](https://CRAN.R-project.org/package=skipTrack)
 <!-- badges: end -->
 
 Welcome to the SkipTrack Package!
 
 SkipTrack is a Bayesian hierarchical model for self-reported menstrual
-cycle length data on mobile health apps. The model is an
-<!-- significant --> extension of the hierarchical model presented in Li
-et al. (2022) that focuses on predicting an individual’s next menstrual
-cycle start date while accounting for cycle length inaccuracies
-introduced by non-adherence in user self-tracked data. Check out the
-‘Getting Started’ vignette to see an overview of the SkipTrack Model!
+cycle length data on mobile health apps. The model is an extension of
+the hierarchical model presented in Li et al. (2022) that focuses on
+predicting an individual’s next menstrual cycle start date while
+accounting for cycle length inaccuracies introduced by non-adherence in
+user self-tracked data. Check out the ‘Getting Started’ vignette to see
+an overview of the SkipTrack Model!
 
 ## Installation
 
@@ -51,6 +53,8 @@ cycle, a 20% probability of being two true cycles recorded as one, and a
 5% probability of being three true cycles recorded as one.
 
 ``` r
+set.seed(1)
+
 #Simulate data
 dat <- skipTrack.simulate(n = 100, model = 'skipTrack', skipProb = c(.75, .2, .05))
 ```
@@ -95,20 +99,20 @@ skipTrack.diagnostics(ft, param = 'cijs')
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" />
 
     #> ----------------------------------------------------
-    #> Generalized MCMC Diagnostics using lanfear Method 
+    #> Generalized MCMC Diagnostics using Custom Method 
     #> ----------------------------------------------------
     #> 
     #> |Effective Sample Size: 
     #> |---------------------------
     #> | Chain 1| Chain 2| Chain 3| Chain 4|     Sum|
     #> |-------:|-------:|-------:|-------:|-------:|
-    #> | 105.807|   46.84| 104.824|  92.098| 349.569|
+    #> |  86.077|    81.6|  91.054| 114.178| 372.909|
     #> 
-    #> |Gelman-Rubin Diagnostic: 
+    #> |psrf: 
     #> |---------------------------
     #> | Point est.| Upper C.I.|
     #> |----------:|----------:|
-    #> |      1.024|      1.027|
+    #> |      1.001|      1.005|
 
 ### Visualization
 
@@ -130,57 +134,69 @@ Importantly, these results are based on a default chain burn-in value of
 750 draws. This can be changed using the parameter `burnIn` for either
 function.
 
+For example using `summary` with the default burnIn…
+
 ``` r
 summary(ft)
-#> ----------------------------------------------------
-#> Summary of skipTrack.fit using skipTrack model
-#> ----------------------------------------------------
-#> Mean Coefficients: 
-#> 
-#>             Estimate       95% CI Lower 95% CI Upper
-#> (Intercept)    3.411              3.383         3.44
-#> 
-#> ----------------------------------------------------
-#> Precision Coefficients: 
-#> 
-#>             Estimate       95% CI Lower 95% CI Upper
-#> (Intercept)    5.573              5.352        5.749
-#> 
-#> ----------------------------------------------------
-#> Diagnostics: 
-#> 
-#>        Effective Sample Size       Gelman-Rubin
-#> Betas                3616.43               1.00
-#> Gammas                 22.24               1.00
-#> cijs                  343.01               1.02
-#> 
-#> ----------------------------------------------------
-
-summary(ft, burnIn = 500)
-#> ----------------------------------------------------
-#> Summary of skipTrack.fit using skipTrack model
-#> ----------------------------------------------------
-#> Mean Coefficients: 
-#> 
-#>             Estimate       95% CI Lower 95% CI Upper
-#> (Intercept)    3.411              3.384         3.44
-#> 
-#> ----------------------------------------------------
-#> Precision Coefficients: 
-#> 
-#>             Estimate       95% CI Lower 95% CI Upper
-#> (Intercept)    5.554              5.325        5.755
-#> 
-#> ----------------------------------------------------
-#> Diagnostics: 
-#> 
-#>        Effective Sample Size       Gelman-Rubin
-#> Betas                3719.83               1.00
-#> Gammas                 21.79               1.00
-#> cijs                  342.89               1.02
-#> 
-#> ----------------------------------------------------
 ```
+
+produces the following output:
+
+    #> ----------------------------------------------------
+    #> Summary of skipTrack.fit using skipTrack model
+    #> ----------------------------------------------------
+    #> Mean Coefficients: 
+    #> 
+    #>             Estimate       95% CI Lower 95% CI Upper
+    #> (Intercept)    3.406              3.376        3.436
+    #> 
+    #> ----------------------------------------------------
+    #> Precision Coefficients: 
+    #> 
+    #>             Estimate       95% CI Lower 95% CI Upper
+    #> (Intercept)     5.36              5.134        5.593
+    #> 
+    #> ----------------------------------------------------
+    #> Diagnostics: 
+    #> 
+    #>        Effective Sample Size       Gelman-Rubin
+    #> Betas                 4004.0                  1
+    #> Gammas                  21.8                  1
+    #> cijs                   351.1                  1
+    #> 
+    #> ----------------------------------------------------
+
+On the other hand if we change the burnIn to 500…
+
+``` r
+summary(ft, burnIn = 500)
+```
+
+we see:
+
+    #> ----------------------------------------------------
+    #> Summary of skipTrack.fit using skipTrack model
+    #> ----------------------------------------------------
+    #> Mean Coefficients: 
+    #> 
+    #>             Estimate       95% CI Lower 95% CI Upper
+    #> (Intercept)    3.407              3.378        3.437
+    #> 
+    #> ----------------------------------------------------
+    #> Precision Coefficients: 
+    #> 
+    #>             Estimate       95% CI Lower 95% CI Upper
+    #> (Intercept)    5.342              5.125        5.569
+    #> 
+    #> ----------------------------------------------------
+    #> Diagnostics: 
+    #> 
+    #>        Effective Sample Size       Gelman-Rubin
+    #> Betas                4004.00                  1
+    #> Gammas                 21.77                  1
+    #> cijs                  460.23                  1
+    #> 
+    #> ----------------------------------------------------
 
 This introduction provides enough information to start fitting the
 SkipTrack model. For further information regarding different methods of
@@ -199,6 +215,7 @@ Li, Kathy, Iñigo Urteaga, Amanda Shea, Virginia J Vitzthum, Chris H
 Wiggins, and Noémie Elhadad. 2022. “A Predictive Model for Next Cycle
 Start Date That Accounts for Adherence in Menstrual Self-Tracking.”
 *Journal of the American Medical Informatics Association* 29 (1): 3–11.
+<https://doi.org/10.1093/jamia/ocab182>.
 
 </div>
 

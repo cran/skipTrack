@@ -33,9 +33,11 @@ skipTrack.fit <- function(Y,cluster,
   li <- ifelse('li' %in% names(dotCalls), dotCalls$li, FALSE)
 
   if(li){
-    liHyperparams <- ifelse('liHyperparams' %in% names(dotCalls),
-                            dotCalls$liHyperparams,
-                            c(kappa = 180, gamma = 6, alpha = 2, beta = 20))
+    if('liHyperparams' %in% names(dotCalls)){
+      liHyperparams <- dotCalls$liHyperparams
+    }else{
+      liHyperparams <- c(kappa = 180, gamma = 6, alpha = 2, beta = 20)
+    }
   }
 
   if(!li & 'li' %in% names(dotCalls)){
@@ -84,7 +86,7 @@ skipTrack.fit <- function(Y,cluster,
     #Run skipTrack.MCMC on each worker (or liMCMC if li == TRUE)
     res <- foreach::foreach(1:chains) %dopar% {
       if(li){
-        liMCMC(Y = Y, cluster = cluster, reps = reps, hyperparams = par, S = numSkips)
+        liMCMC(Y = Y, cluster = cluster, reps = reps, hyperparams = par, S = numSkips, ...)
       }else{
         skipTrack.MCMC(Y = Y, cluster = cluster, X = X, Z = Z, numSkips = numSkips, reps = reps,
                       ...)
@@ -97,7 +99,7 @@ skipTrack.fit <- function(Y,cluster,
 
     res <- foreach::foreach(1:chains) %do% {
       if(li){
-        liMCMC(Y = Y, cluster = cluster, reps = reps, hyperparams = par, S = numSkips)
+        liMCMC(Y = Y, cluster = cluster, reps = reps, hyperparams = par, S = numSkips, ...)
       }else{
         skipTrack.MCMC(Y = Y, cluster = cluster, X = X, Z = Z, numSkips = numSkips, reps = reps,
                       ...)

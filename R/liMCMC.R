@@ -17,6 +17,7 @@
 #'   - \code{beta}:  Numeric value, shape2 parameter of Beta distribution for Pi_i.
 #' @param initialParams A list of initial parameter values for the MCMC algorithm.
 #' Default values are provided for pi, lambdais, piis, ss.
+#' @param ... For catching unused arguments (like li = TRUE)
 #'
 #' @return A list containing the MCMC draws for each parameter at each iteration. Each element
 #' in the list is itself a list containing:
@@ -47,9 +48,26 @@ liMCMC <- function(Y,
                                                ss = sample(0:S,
                                                            nrow(cycleDat),
                                                            replace = TRUE)),
-                   reps = 1000){
+                   reps = 1000, ...){
   #Create cycleDat
   cycleDat <- data.frame('TrackedCycles' = Y, 'Individual' = cluster)
+
+  #Deal with initial params
+  ip  <-  list(pi = c(1/3, 1/3, 1/3),
+               lambdais = rep(30,
+                              length(unique(cycleDat$Individual))),
+               piis = rep(.2,
+                          length(unique(cycleDat$Individual))),
+               ss = sample(0:S,
+                           nrow(cycleDat),
+                           replace = TRUE))
+  for(nm in names(ip)){
+    if(nm %in% names(initialParams)){
+      ip[nm] <- initialParams[nm]
+    }
+  }
+
+  initialParams <- ip
 
   #Organize data into initial list
   iDat <- data.frame('Individual' = unique(cycleDat$Individual),

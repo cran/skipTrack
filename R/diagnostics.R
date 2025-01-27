@@ -5,7 +5,7 @@
 #' @param stFit A list of MCMC results from the skipTrack.fit function.
 #' @param param A character string specifying the parameter for which diagnostics are to be calculated.
 #'   Must be one of: 'rho', 'phi', 'Betas', 'Gammas', 'muis', 'tauis', or 'cijs'.
-#' @param method An optional parameter specifying the method for calculating diagnostics. See package genMCMCDiag for details. Default is NULL.
+#' @param proximityMap An optional parameter specifying the proximity-map for calculating diagnostics. See package genMCMCDiag for details. Default is NULL.
 #' @param ... Additional parameters to be passed to the genDiagnostic function.
 #' @inheritDotParams genMCMCDiag::genDiagnostic diagnostics distance verbose
 #'
@@ -14,13 +14,13 @@
 #' @details If the parameter is 'rho' or 'phi' (the univariate parameters),
 #'   the function extracts the specified parameter from the MCMC results and calculates
 #'   diagnostics using the genDiagnostic function with the
-#'   standard method. If the parameter is any of the other available options, the
+#'   standard proximityMap. If the parameter is any of the other available options, the
 #'   function extracts the corresponding values and calculates diagnostics using the genDiagnostic
-#'   function with the specified or default method ('lanfear') and hammingDist as the distance function.
+#'   function with the specified or default proximityMap ('lanfear') and hammingDist as the distance function.
 #'
-#'   Details on the genDiagnostic function can be found in the genMCMCDiag package.
+#'   Details on genDiagnostic can be found in the genMCMCDiag package.
 #'
-#' @seealso \code{\link{genDiagnostic}}, \code{\link{skipTrack.fit}}
+#' @seealso \code{\link[genMCMCDiag:genDiagnostic]{genDiagnostic}}, \code{\link{skipTrack.fit}}
 #'
 #' @export
 #'
@@ -34,7 +34,7 @@
 #' #Get diagnostics for cijs
 #' skipTrack.diagnostics(modFit, 'cijs')
 skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gammas', 'muis', 'tauis', 'cijs'),
-                                  method = NULL, ...){
+                                  proximityMap = NULL, ...){
   #If class is skipTrack.model, extract chains, otherwise assume we have chains
   if('skipTrack.model' %in% class(stFit)){
     #Get fit results
@@ -56,9 +56,9 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
     })
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = 'standard', ...))
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = 'standard', ...))
 
-  }else if(param == 'cijs'){ #Continued alternative methods specific to skipTrack
+  }else if(param == 'cijs'){ #Continued alternative proximityMaps specific to skipTrack
 
     #Extract cijs
     mcmcExt <- lapply(stFit, function(chain){
@@ -71,16 +71,16 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
       return(draws)
     })
 
-    #set method if not specified
-    if(is.null(method)){
-      method <- 'lanfear'
+    #set proximityMap if not specified
+    if(is.null(proximityMap)){
+      proximityMap <- 'lanfear'
     }
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = method,
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
-  }else if(param == 'Betas'){ #Continued alternative methods specific to skipTrack
+  }else if(param == 'Betas'){ #Continued alternative proximityMaps specific to skipTrack
 
     #Extract cijs
     mcmcExt <- lapply(stFit, function(chain){
@@ -93,16 +93,16 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
       return(draws)
     })
 
-    #set method if not specified
-    if(is.null(method)){
-      method <- 'lanfear'
+    #set proximityMap if not specified
+    if(is.null(proximityMap)){
+      proximityMap <- 'lanfear'
     }
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = method,
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
-  }else if(param == 'Gammas'){ #Continued alternative methods specific to skipTrack
+  }else if(param == 'Gammas'){ #Continued alternative proximityMaps specific to skipTrack
 
     #Extract cijs
     mcmcExt <- lapply(stFit, function(chain){
@@ -115,13 +115,13 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
       return(draws)
     })
 
-    #set method if not specified
-    if(is.null(method)){
-      method <- 'lanfear'
+    #set proximityMap if not specified
+    if(is.null(proximityMap)){
+      proximityMap <- 'lanfear'
     }
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = method,
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
   }else if(param == 'muis'){
@@ -136,13 +136,13 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
       return(draws)
     })
 
-    #set method if not specified
-    if(is.null(method)){
-      method <- 'lanfear'
+    #set proximityMap if not specified
+    if(is.null(proximityMap)){
+      proximityMap <- 'lanfear'
     }
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = method,
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
   }else if(param == 'tauis'){
@@ -157,16 +157,16 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
       return(draws)
     })
 
-    #set method if not specified
-    if(is.null(method)){
-      method <- 'lanfear'
+    #set proximityMap if not specified
+    if(is.null(proximityMap)){
+      proximityMap <- 'lanfear'
     }
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = method,
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
-  }else if(param == 'sijs'){ #Method for LI inference
+  }else if(param == 'sijs'){ #proximityMap for LI inference
 
     #Extract sijs
     mcmcExt <- lapply(stFit, function(chain){
@@ -179,13 +179,13 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
       return(draws)
     })
 
-    #set method if not specified
-    if(is.null(method)){
-      method <- 'lanfear'
+    #set proximityMap if not specified
+    if(is.null(proximityMap)){
+      proximityMap <- 'lanfear'
     }
 
     #Calculate diagnostics and return
-    return(genMCMCDiag::genDiagnostic(mcmcExt, method = method,
+    return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
   }else{ #Throw error if param is not recognized

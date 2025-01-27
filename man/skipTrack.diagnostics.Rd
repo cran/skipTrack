@@ -7,7 +7,7 @@
 skipTrack.diagnostics(
   stFit,
   param = c("rho", "phi", "Betas", "Gammas", "muis", "tauis", "cijs"),
-  method = NULL,
+  proximityMap = NULL,
   ...
 )
 }
@@ -17,13 +17,13 @@ skipTrack.diagnostics(
 \item{param}{A character string specifying the parameter for which diagnostics are to be calculated.
 Must be one of: 'rho', 'phi', 'Betas', 'Gammas', 'muis', 'tauis', or 'cijs'.}
 
-\item{method}{An optional parameter specifying the method for calculating diagnostics. See package genMCMCDiag for details. Default is NULL.}
+\item{proximityMap}{An optional parameter specifying the proximity-map for calculating diagnostics. See package genMCMCDiag for details. Default is NULL.}
 
 \item{...}{
   Arguments passed on to \code{\link[genMCMCDiag:genDiagnostic]{genMCMCDiag::genDiagnostic}}
   \describe{
-    \item{\code{diagnostics}}{A character vector or list of diagnostic functions to be evaluated. Options include 'traceplot', 'ess', 'gelmanRubin', or custom functions. See details.}
-    \item{\code{distance}}{Function for evaluating distance between MCMC draws if required by 'method'. This should be a pairwise distance function that operates on elements of the chains from mhDraws. Note that the lanfear and ts methods ALWAYS require a distance function.}
+    \item{\code{diagnostics}}{A character vector or list of diagnostic functions to be evaluated. Options include 'traceplot', 'ess', 'psrf', or custom functions. See details.}
+    \item{\code{distance}}{Function for evaluating distance between MCMC draws if required by 'method'. This should be a pairwise distance function that operates on elements of the chains from mhDraws. Note that the lanfear and ts proximityMaps ALWAYS require a distance function.}
     \item{\code{verbose}}{If TRUE, informative messages are displayed.}
   }}
 }
@@ -37,11 +37,11 @@ Takes model results from skipTrack.fit and uses genMCMCDiag to get generalized m
 If the parameter is 'rho' or 'phi' (the univariate parameters),
 the function extracts the specified parameter from the MCMC results and calculates
 diagnostics using the genDiagnostic function with the
-standard method. If the parameter is any of the other available options, the
+standard proximityMap. If the parameter is any of the other available options, the
 function extracts the corresponding values and calculates diagnostics using the genDiagnostic
-function with the specified or default method ('lanfear') and hammingDist as the distance function.
+function with the specified or default proximityMap ('lanfear') and hammingDist as the distance function.
 
-Details on the genDiagnostic function can be found in the genMCMCDiag package.
+Details on genDiagnostic can be found in the genMCMCDiag package.
 }
 \examples{
 #Simulated data
@@ -54,5 +54,5 @@ modFit <- skipTrack.fit(Y = simDat$Y, cluster = simDat$cluster, chains = 2, reps
 skipTrack.diagnostics(modFit, 'cijs')
 }
 \seealso{
-\code{\link{genDiagnostic}}, \code{\link{skipTrack.fit}}
+\code{\link[genMCMCDiag:genDiagnostic]{genDiagnostic}}, \code{\link{skipTrack.fit}}
 }

@@ -13,7 +13,8 @@ liMCMC(
     length(unique(cycleDat$Individual))), piis = rep(0.2,
     length(unique(cycleDat$Individual))), ss = sample(0:S, nrow(cycleDat), replace =
     TRUE)),
-  reps = 1000
+  reps = 1000,
+  ...
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ elements: kappa, gamma, alpha, beta. NOTE: MUST BE IN CORRECT ORDER.
 Default values are provided for pi, lambdais, piis, ss.}
 
 \item{reps}{The number of MCMC iterations (steps) to perform. Default is 1000.}
+
+\item{...}{For catching unused arguments (like li = TRUE)}
 }
 \value{
 A list containing the MCMC draws for each parameter at each iteration. Each element

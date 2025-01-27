@@ -1,7 +1,7 @@
 #' Get tables of Inference results from skipTrack.fit
 #'
 #' This function calculates inference results on Betas, Gammas, and cijs based on the provided MCMC results.
-#' It returns summaries such as credible intervals for Betas, Gammas, wald-type confidence intervals for cijs, and Gelman-Rubin diagnostics for all 3.
+#' It returns summaries such as credible intervals for Betas, Gammas, wald-type confidence intervals for cijs, and Gelman-Rubin PSRF diagnostics for all 3.
 #' Note that true values and converage are included in the output if trueVals is supplied, but otherwise not.
 #'
 #' @param stFit Object result of skipTrack.fit function.
@@ -132,7 +132,7 @@ skipTrack.results <- function(stFit, trueVals = NULL, burnIn = 750){
 
     return(data.frame('Parameter' = param,
                       'Effective Sample Size' = dRes$diagnostics$ess$Sum,
-                      'Gelman-Rubin' = dRes$diagnostics$gelmanRubin$`Point est.`,
+                      'Gelman-Rubin' = dRes$diagnostics$psrf$`Point est.`,
                       check.names = FALSE))
   })
   diags <- do.call('rbind', diags)

@@ -15,6 +15,7 @@
 #' @param trueBetas Optional. True values for the mean regression coefficients (not counting intercept which is automatic based on the model).
 #' @param trueGammas Optional. True values for the precision regression coefficients (not counting intercept which is automatic based on the model). Precision covariates not available for model == 'li'.
 #' @param overlap Optional. Number of (non-intercept) columns shared between X and Z. Columns are shared from left to right.
+#' @param avgCyclesPer Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.
 #'
 #' @return A list containing:
 #' \describe{
@@ -53,7 +54,8 @@ skipTrack.simulate <- function(n,
                          maxCycles = length(skipProb),
                          trueBetas = NULL,
                          trueGammas = NULL,
-                         overlap = 0){
+                         overlap = 0,
+                         avgCyclesPer = 7){
 
   #Checks for built in models, custom models are on their own.
   if(is.character(model)){
@@ -77,11 +79,13 @@ skipTrack.simulate <- function(n,
       simDat <- lapply(1:n, stSim, skipProb = skipProb, maxCycles = maxCycles,
                        trueBetas = trueBetas,
                        trueGammas = trueGammas,
-                       overlap = overlap)
+                       overlap = overlap,
+                       avgCyclesPer = avgCyclesPer)
       simDat <- do.call('rbind', simDat)
     }else if(model[1] == 'li'){
       simDat <- lapply(1:n, liSim, skipProb = skipProb, maxCycles = maxCycles,
-                       trueBetas = trueBetas, trueGammas = trueGammas)
+                       trueBetas = trueBetas, trueGammas = trueGammas,
+                       avgCyclesPer = avgCyclesPer)
       simDat <- do.call('rbind', simDat)
     }else if(model[1] == 'mixture'){
       simDat <- lapply(1:n, mixSim,
@@ -89,7 +93,8 @@ skipTrack.simulate <- function(n,
                        maxCycles = maxCycles,
                        trueBetas = trueBetas,
                        trueGammas = trueGammas,
-                       overlap = overlap)
+                       overlap = overlap,
+                       avgCyclesPer = avgCyclesPer)
       simDat <- do.call('rbind', simDat)
     }else{
       stop('specified model is unknown.')
@@ -143,6 +148,7 @@ skipTrack.simulate <- function(n,
 #' @param trueBetas Optional. True values for the mean regression coefficients (not counting intercept which is automatic based on the model).
 #' @param trueGammas Optional. True values for the precision regression coefficients (not counting intercept which is automatic based on the model).
 #' @param overlap Optional. Number of (non-intercept) columns shared between X and Z. Columns are shared from left to right.
+#' @param avgCyclesPer Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.
 #'
 #' @return
 #' \describe{
@@ -158,10 +164,10 @@ skipTrack.simulate <- function(n,
 #' }
 #'
 #' @seealso \code{\link{skipTrack.simulate}}
-stSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas, overlap){
+stSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas, overlap, avgCyclesPer){
   #For each individual, generate the number of (tracked) cycles from poisson(7)
   #(restricted to > 0)
-  numCycles <- max(rpois(1, 7), 1)
+  numCycles <- max(rpois(1, avgCyclesPer), 1)
 
   #If trueBetas or trueGammas don't exist, set mean/precision to given average,
   #otherwise, create the number of requested covariates and record effects
@@ -221,6 +227,7 @@ stSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas, overlap){
 #' @param maxCycles Integer, Maximum possible number of true cycles per tracked cycle.
 #' @param trueBetas Optional. True values for generated mean regression coefficients.
 #' @param trueGammas NULL, left for consistency. Will throw error if specified.
+#' @param avgCyclesPer Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.
 #'
 #' @return
 #' \describe{
@@ -235,14 +242,14 @@ stSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas, overlap){
 #'   \item{'X0',...,'XN'}{Covariate matrix for Mean, where N is the length of trueBetas.}
 #' }
 #' @seealso \code{\link{skipTrack.simulate}}
-liSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas = NULL){
+liSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas = NULL, avgCyclesPer){
   if(!is.null(trueGammas)){
     warning('Li data generation model does not take covs for precision, trueGamma input will be ignored')
   }
 
   #For each individual, generate the number of (tracked) cycles from poisson(7)
   #(restricted to > 0)
-  numCycles <- max(rpois(1, 7), 1)
+  numCycles <- max(rpois(1, avgCyclesPer), 1)
 
   #For each individual sample a mean
   indMean <- rgamma(1, 180, 6)
@@ -298,6 +305,7 @@ liSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas = NULL){
 #' @param trueBetas Optional. True values for generated mean regression coefficients.
 #' @param trueGammas Optional. True values for the generated precision regression coefficients.
 #' @param overlap Optional. Number of (non-intercept) columns shared between X and Z. Columns are shared from left to right.
+#' @param avgCyclesPer Average number of cycles contributed by each individual. Actual number is drawn from Poisson for each person. Default is 7.
 #'
 #' @return
 #' \describe{
@@ -312,10 +320,10 @@ liSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas = NULL){
 #' }
 #'
 #' @seealso \code{\link{skipTrack.simulate}}
-mixSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas, overlap){
+mixSim <- function(i, skipProb, maxCycles, trueBetas, trueGammas, overlap, avgCyclesPer){
   #For each individual, generate the number of (tracked) cycles from poisson(7)
   #(restricted to > 0)
-  numCycles <- max(rpois(1, 7), 1)
+  numCycles <- max(rpois(1, avgCyclesPer), 1)
 
   #Per cycle generate numTrue
   cs <- sample(1:maxCycles, numCycles, replace = TRUE, prob = skipProb)
