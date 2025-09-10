@@ -6,7 +6,7 @@
 \usage{
 skipTrack.diagnostics(
   stFit,
-  param = c("rho", "phi", "Betas", "Gammas", "muis", "tauis", "cijs"),
+  param = c("rho", "phi", "Betas", "Gammas", "tauis", "cijs"),
   proximityMap = NULL,
   ...
 )

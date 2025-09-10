@@ -94,6 +94,12 @@ longer).
 
 ``` r
 skipTrack.diagnostics(ft, param = 'cijs')
+#> Warning in attr(x, "align"): 'xfun::attr()' is deprecated.
+#> Use 'xfun::attr2()' instead.
+#> See help("Deprecated")
+#> Warning in attr(x, "align"): 'xfun::attr()' is deprecated.
+#> Use 'xfun::attr2()' instead.
+#> See help("Deprecated")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" />
@@ -104,15 +110,15 @@ skipTrack.diagnostics(ft, param = 'cijs')
     #> 
     #> |Effective Sample Size: 
     #> |---------------------------
-    #> | Chain 1| Chain 2| Chain 3| Chain 4|     Sum|
-    #> |-------:|-------:|-------:|-------:|-------:|
-    #> |  86.077|    81.6|  91.054| 114.178| 372.909|
+    #> | Chain 1| Chain 2| Chain 3| Chain 4|    Sum|
+    #> |-------:|-------:|-------:|-------:|------:|
+    #> |  26.895|  18.342|  18.723|  19.814| 83.774|
     #> 
     #> |psrf: 
     #> |---------------------------
     #> | Point est.| Upper C.I.|
     #> |----------:|----------:|
-    #> |      1.001|      1.005|
+    #> |      1.003|      1.009|
 
 ### Visualization
 
@@ -148,21 +154,21 @@ produces the following output:
     #> Mean Coefficients: 
     #> 
     #>             Estimate       95% CI Lower 95% CI Upper
-    #> (Intercept)    3.406              3.376        3.436
+    #> (Intercept)    3.406              3.382        3.437
     #> 
     #> ----------------------------------------------------
     #> Precision Coefficients: 
     #> 
     #>             Estimate       95% CI Lower 95% CI Upper
-    #> (Intercept)     5.36              5.134        5.593
+    #> (Intercept)    5.342              5.156         5.53
     #> 
     #> ----------------------------------------------------
     #> Diagnostics: 
     #> 
     #>        Effective Sample Size       Gelman-Rubin
-    #> Betas                 4004.0                  1
-    #> Gammas                  21.8                  1
-    #> cijs                   351.1                  1
+    #> Betas                3077.74               1.00
+    #> Gammas                 21.85               1.01
+    #> cijs                   68.15               1.00
     #> 
     #> ----------------------------------------------------
 
@@ -180,21 +186,21 @@ we see:
     #> Mean Coefficients: 
     #> 
     #>             Estimate       95% CI Lower 95% CI Upper
-    #> (Intercept)    3.407              3.378        3.437
+    #> (Intercept)    3.405              3.378        3.433
     #> 
     #> ----------------------------------------------------
     #> Precision Coefficients: 
     #> 
     #>             Estimate       95% CI Lower 95% CI Upper
-    #> (Intercept)    5.342              5.125        5.569
+    #> (Intercept)    5.322              5.106        5.526
     #> 
     #> ----------------------------------------------------
     #> Diagnostics: 
     #> 
     #>        Effective Sample Size       Gelman-Rubin
-    #> Betas                4004.00                  1
-    #> Gammas                 21.77                  1
-    #> cijs                  460.23                  1
+    #> Betas                3818.63               1.00
+    #> Gammas                 22.59               1.01
+    #> cijs                   75.03               1.01
     #> 
     #> ----------------------------------------------------
 
@@ -215,7 +221,6 @@ Li, Kathy, Iñigo Urteaga, Amanda Shea, Virginia J Vitzthum, Chris H
 Wiggins, and Noémie Elhadad. 2022. “A Predictive Model for Next Cycle
 Start Date That Accounts for Adherence in Menstrual Self-Tracking.”
 *Journal of the American Medical Informatics Association* 29 (1): 3–11.
-<https://doi.org/10.1093/jamia/ocab182>.
 
 </div>
 

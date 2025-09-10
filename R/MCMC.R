@@ -22,7 +22,7 @@
 #'   \item{rho}{Updated value of the global parameter rho.}
 #'   \item{pi}{Updated value of the global parameter pi.}
 #'   \item{Xi}{Matrix of covariates for cycle length mean.}
-#'   \item{Zi}{Matrix of covariates for cycle length precision.}
+#'   \item{Z}{Matrix of covariates for cycle length precision.}
 #'   \item{Beta}{Updated matrix of coefficients for cycle length mean.}
 #'   \item{Gamma}{Updated matrix of coefficients for cycle length precision.}
 #'   \item{priorAlphas}{Vector of prior alpha values for updating pi.}
@@ -47,8 +47,9 @@ skipTrack.MCMC <- function(Y,cluster,
                                                           length(unique(cluster))),
                                                tauis = rep(5,
                                                           length(unique(cluster))),
+                                               bs = rep(0, length(unique(cluster))),
                                                rho = 1,
-                                               cijs = sample(1:3, length(Y), replace = TRUE),
+                                               cijs = rep(1, length(Y)),
                                                alphas = rep(1, numSkips +1),
                                                Beta = matrix(rep(0, ncol(as.matrix(X))),1),
                                                Gamma = matrix(rep(0, ncol(as.matrix(Z))),1),
@@ -63,8 +64,9 @@ skipTrack.MCMC <- function(Y,cluster,
                         length(unique(cluster))),
              tauis = rep(5,
                          length(unique(cluster))),
+             bs = rep(0, length(unique(cluster))),
              rho = 1,
-             cijs = sample(1:3, length(Y), replace = TRUE),
+             cijs = rep(1, length(Y)),
              alphas = rep(1, numSkips +1),
              Beta = matrix(rep(0, ncol(as.matrix(X))),1),
              Gamma = matrix(rep(0, ncol(as.matrix(Z))),1),
@@ -85,36 +87,30 @@ skipTrack.MCMC <- function(Y,cluster,
   X <- as.matrix(X)
   Z <- as.matrix(Z)
 
-  #Make X and Z unique by individual (as currently expected by sampleStep)
-  #IF ADDING TIME-VARYING COVARIATES THIS NEEDS TO CHANGE
-  X <- as.matrix(unique(cbind(cluster, as.data.frame(X))))[,-1, drop = F]
+  #Make Z unique by individual (as currently expected by sampleStep)
   Z <- as.matrix(unique(cbind(cluster, as.data.frame(Z))))[,-1, drop = F]
 
-  if(nrow(X) != length(unique(cluster))){
-    stop('X must be a num_individuals x num_covariates matrix')
-  }
   if(nrow(Z) != length(unique(cluster))){
-    stop('Z must be a num_individuals x num_covariates matrix')
+    stop('Z cannot contain any time-varying covariates. Each row in Z associated with an individual must be identical to every other row for that individual.')
   }
-
 
   #Organize data into initial list
   iDat <- data.frame('Individual' = unique(cluster),
-                     'mus' = initialParams$muis,
                      'taus' = initialParams$tauis,
+                     'bs' = initialParams$bs,
                      'thetas' = exp(Z %*% t(initialParams$Gamma)))
   ijDat <- data.frame('Individual' = cluster,
                       'ys' = Y,
-                      'cijs' = initialParams$cijs,#)
-                      'muis' = sapply(cluster, function(ind){iDat$mus[iDat$Individual == ind]}),
-                      'tauis' = sapply(cluster, function(ind){iDat$taus[iDat$Individual == ind]}))
+                      'cijs' = initialParams$cijs,
+                      'mijs' = log(Y/initialParams$cijs),
+                      'muijs' = sapply(cluster, function(ind){initialParams$muis[iDat$Individual == ind]}))
   fullDraws <- vector('list', reps + 1)
   fullDraws[[1]] <- list(ijDat = ijDat,
                          iDat = iDat,
                          rho = initialParams$rho,
                          pi = initialParams$pi,
-                         Xi = X,
-                         Zi = Z,
+                         X = X,
+                         Z = Z,
                          Beta = initialParams$Beta,
                          Gamma = initialParams$Gamma,
                          priorAlphas = initialParams$alphas,
@@ -130,6 +126,13 @@ skipTrack.MCMC <- function(Y,cluster,
   #Do gibbs steps
   for(t in 1:reps){
     fullDraws[[t+1]] <- do.call('sampleStep', fullDraws[[t]])
+
+    #Remove unecessary info from draws just used (to save space!!)
+    fullDraws[[t]]$X <- NULL
+    fullDraws[[t]]$Z <- NULL
+    fullDraws[[t]]$indFirst <- NULL
+    fullDraws[[t]]$ijDat$ys <- NULL
+
     if(verbose){utils::setTxtProgressBar(pb, t)}
   }
   return(fullDraws)
@@ -144,8 +147,8 @@ skipTrack.MCMC <- function(Y,cluster,
 #' @param iDat A data.frame with individual level parameters: Individual, mus, taus, thetas.
 #' @param rho Updated value of the global parameter rho.
 #' @param pi Updated value of the global parameter pi.
-#' @param Xi A matrix (numIndividuals x length(Beta)) of covariates for cycle length mean. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF X
-#' @param Zi A matrix (numIndividuals x length(Gamma)) of covariates for cycle length precision. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF Z
+#' @param X A matrix (numIndividuals x length(Beta)) of covariates for cycle length mean. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF X
+#' @param Z A matrix (numIndividuals x length(Gamma)) of covariates for cycle length precision. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF Z
 #' @param Beta Matrix (1 x length(Beta)) of coefficients for cycle length mean.
 #' @param Gamma Matrix of (1 x length(Gamma)) coefficients for cycle length precision.
 #' @param priorAlphas Vector of prior alpha values for updating pi.
@@ -163,8 +166,8 @@ skipTrack.MCMC <- function(Y,cluster,
 #'   \item{iDat}{A data.frame with updated parameters at the individual level: Individual, mus, taus, thetas.}
 #'   \item{rho}{Updated value of the global parameter rho.}
 #'   \item{pi}{Updated value of the global parameter pi.}
-#'   \item{Xi}{Matrix of covariates for cycle length mean.}
-#'   \item{Zi}{Matrix of covariates for cycle length precision.}
+#'   \item{X}{Matrix of covariates for cycle length mean.}
+#'   \item{Z}{Matrix of covariates for cycle length precision.}
 #'   \item{Beta}{Updated matrix of coefficients for cycle length mean.}
 #'   \item{Gamma}{Updated matrix of coefficients for cycle length precision.}
 #'   \item{priorAlphas}{Vector of prior alpha values for updating pi.}
@@ -177,66 +180,78 @@ skipTrack.MCMC <- function(Y,cluster,
 #' }
 #'
 sampleStep <- function(ijDat, iDat, rho, pi,
-                       Xi, Zi, Beta, Gamma,
+                       X, Z, Beta, Gamma,
                        priorAlphas, indFirst,
                        rhoBeta, rhoGamma, phi, rhoPhi, fixedSkips){
   #Start with high level (without Gamma and thetais as those are connected)
-  newBeta <- postBeta(rhoBeta = rhoBeta, rho = rho, Xi = Xi, muI = iDat$mus)
+  newBeta <- postBeta(rhoBeta = rhoBeta, X = X, b = iDat$b,
+                      m = ijDat$mijs, tau = iDat$taus, indFirst = indFirst)
 
-  #Set xib based on newBeta
-  xib <- Xi %*% t(newBeta)
+  #Set XiBeta based on newBeta
+  XBeta <- X %*% t(newBeta)
+
+  #Draw new bs (a good value of rho depends on bs being somewhat reasonable)
+  newBs <- sapply(iDat$Individual, function(ind){
+    postB(taui = iDat$taus[iDat$Individual == ind],
+          mi = ijDat$mijs[ijDat$Individual == ind],
+          XiBeta = XBeta[ijDat$Individual == ind,],
+          rho = rho)
+  })
 
   #Continue with high level information
-  newRho <- postRho(muI = iDat$mus, xib = xib)
+  newRho <- postRho(b = newBs)
   newPi <- postPi(ci = ijDat$cijs, priorAlphas = priorAlphas)
 
-  #Now i level
-  newMuis <- lapply(iDat$Individual, function(ind){
-    postMui(yij = ijDat$ys[ijDat$Individual == ind],
-            cij = ijDat$cijs[ijDat$Individual == ind],
-            taui = iDat$taus[iDat$Individual == ind],
-            xib = xib[iDat$Individual == ind], rho = newRho)
+  #Calculate new muijs
+  newMuijs <- sapply(iDat$Individual, function(ind){
+    XiBeta = XBeta[ijDat$Individual == ind,]
+    return(XiBeta + newBs[iDat$Individual == ind])
   })
-  newMuis <- do.call('c', newMuis)
+  newMuijs <- do.call('c', newMuijs)
 
   newTauis <- lapply(iDat$Individual, function(ind){
     postTaui(yij = ijDat$ys[ijDat$Individual == ind],
              cij = ijDat$cijs[ijDat$Individual == ind],
-             mui = iDat$mus[iDat$Individual == ind],
+             mui = newMuijs[ijDat$Individual == ind],
              thetai = iDat$thetas[iDat$Individual == ind],
              phi = phi)
   })
   newTauis <- do.call('c', newTauis)
 
   #High level Gamma Things
-  newGamList <- postGamma(taui = newTauis[indFirst], Zi = Zi, currentGamma = Gamma, phi = phi,
+  newGamList <- postGamma(taui = newTauis, Z = Z, currentGamma = Gamma, phi = phi,
                           rhoGamma = rhoGamma)
   newGamma <- newGamList$Gamma
   newThetas <- newGamList$thetai
 
   #High Level, Phi
-  newPhi <- postPhi(taui = newTauis[indFirst], thetai = newThetas, currentPhi = phi,
+  newPhi <- postPhi(taui = newTauis, thetai = newThetas, currentPhi = phi,
                     rhoPhi = rhoPhi)
 
   #Create new i level information
-  iDatNew <- data.frame(Individual = iDat$Individual,
-                        mus = newMuis[indFirst],
-                        taus = newTauis[indFirst],
-                        thetas = newThetas)
+  iDatNew <- iDat
+  iDatNew$bs <- newBs
+  iDatNew$taus <- newTauis
+  iDatNew$thetas <- newThetas
 
+  #New ij level information
   ijDatNew <- ijDat
-  ijDatNew$muis <- newMuis
-  ijDatNew$tauis <- newTauis
+  ijDatNew$muijs <- newMuijs
+
 
   if(fixedSkips){
     ijDatNew$cijs <- ijDat$cijs
+    ijDatNew$mijs <- ijDat$mijs
   }else{
     ijDatNew$cijs <- postCij(ijDatNew$ys, pi = newPi,
-                           muis = ijDatNew$muis, tauis = ijDatNew$tauis)
+                           muis = ijDatNew$muijs,
+                           tauis = sapply(ijDatNew$Individual,
+                                          function(ind){iDatNew$taus[iDatNew$Individual == ind]}))
+    ijDatNew$mijs <- log(ijDatNew$ys/ijDatNew$cijs)
   }
 
   return(list(ijDat = ijDatNew, iDat = iDatNew, rho = newRho,
-              pi = newPi, Xi = Xi, Zi = Zi, Beta = newBeta,
+              pi = newPi, X = X, Z = Z, Beta = newBeta,
               Gamma = newGamma, priorAlphas = priorAlphas, indFirst = indFirst,
               rhoBeta = rhoBeta, rhoGamma = rhoGamma, phi = newPhi, rhoPhi = rhoPhi,
               fixedSkips = fixedSkips))

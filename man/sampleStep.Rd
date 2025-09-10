@@ -9,8 +9,8 @@ sampleStep(
   iDat,
   rho,
   pi,
-  Xi,
-  Zi,
+  X,
+  Z,
   Beta,
   Gamma,
   priorAlphas,
@@ -31,9 +31,9 @@ sampleStep(
 
 \item{pi}{Updated value of the global parameter pi.}
 
-\item{Xi}{A matrix (numIndividuals x length(Beta)) of covariates for cycle length mean. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF X}
+\item{X}{A matrix (numIndividuals x length(Beta)) of covariates for cycle length mean. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF X}
 
-\item{Zi}{A matrix (numIndividuals x length(Gamma)) of covariates for cycle length precision. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF Z}
+\item{Z}{A matrix (numIndividuals x length(Gamma)) of covariates for cycle length precision. Default is a vector of 1's. NOTE THE DIFFERENCE (from skipTrack.MCMC) IN EXPECTED DIMENSION OF Z}
 
 \item{Beta}{Matrix (1 x length(Beta)) of coefficients for cycle length mean.}
 
@@ -61,8 +61,8 @@ The list includes:
 \item{iDat}{A data.frame with updated parameters at the individual level: Individual, mus, taus, thetas.}
 \item{rho}{Updated value of the global parameter rho.}
 \item{pi}{Updated value of the global parameter pi.}
-\item{Xi}{Matrix of covariates for cycle length mean.}
-\item{Zi}{Matrix of covariates for cycle length precision.}
+\item{X}{Matrix of covariates for cycle length mean.}
+\item{Z}{Matrix of covariates for cycle length precision.}
 \item{Beta}{Updated matrix of coefficients for cycle length mean.}
 \item{Gamma}{Updated matrix of coefficients for cycle length precision.}
 \item{priorAlphas}{Vector of prior alpha values for updating pi.}

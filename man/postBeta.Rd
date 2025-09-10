@@ -4,25 +4,29 @@
 \alias{postBeta}
 \title{Draw from Posterior Distribution for Beta Parameters}
 \usage{
-postBeta(rhoBeta = 0.01, rho, Xi, muI)
+postBeta(rhoBeta = 0.01, X, b, m, tau, indFirst)
 }
 \arguments{
 \item{rhoBeta}{A scalar representing the prior precision parameter for beta.}
 
-\item{rho}{A scalar representing the precision parameter.}
+\item{X}{A matrix of covariates, where each row represents a cycle and each column represents a covariate.}
 
-\item{Xi}{A matrix of covariates, where each row represents an individual and each column represents a covariate.}
+\item{b}{A vector where each element is the random effect/intercept for individual \code{i}.}
 
-\item{muI}{A vector where each element is the mean for individual i.}
+\item{m}{A vector of observed means (\code{mui}) for each cycle.}
+
+\item{tau}{A vector where each element is the precision for individual \code{i} (length = number of individuals).}
+
+\item{indFirst}{An logical vector (length = number of individuals); each entry is TRUE if this is the first cycle for that individual in the vector of observations. Used to identify submatrices of X and m.}
 }
 \value{
-A vector representing a draw from the posterior distribution of beta parameters.
+A numeric vector representing a draw from the posterior distribution of beta parameters.
 }
 \description{
-In our model mui follows a normal distribution with mean Xi^T \%*\% beta and precision rho. Additionally
-we assume that beta follows a mvnormal prior with mean 0 and precision (rho_Beta) * I.This function draws
-from the posterior distribution of beta under these assumptions.
+In our model, \code{mui} follows a normal distribution with mean \eqn{X_{i}^{T} \beta + b_{i}} and precision \eqn{tau_i}.
+Additionally, we assume that \code{beta} follows a multivariate normal prior with mean 0 and precision \eqn{rhoBeta \cdot I}.
+This function draws from the posterior distribution of \code{beta} under these assumptions.
 }
 \details{
-This function assumes that \code{Xi} is a (num Individuals) x (dimension of beta) matrix of covariates.
+For each individual, the function extracts the relevant rows of \code{X} and \code{m} using \code{indFirst}, and multiplies by the individual's precision \code{tau[i]}. It then computes the updated posterior precision and mean for \code{beta} and returns a sample from the resulting multivariate normal distribution. Requires the \code{mvtnorm} package.
 }

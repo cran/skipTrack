@@ -8,7 +8,7 @@ test_that("skipTrack.diagnostics runs on all options", {
   expect_no_error(skipTrack.diagnostics(foo, 'phi'))
   expect_no_error(skipTrack.diagnostics(foo, 'Betas'))
   expect_no_error(skipTrack.diagnostics(foo, 'Gammas'))
-  expect_no_error(skipTrack.diagnostics(foo, 'muis'))
+  expect_no_error(skipTrack.diagnostics(foo, 'muijs'))
   expect_no_error(skipTrack.diagnostics(foo, 'tauis'))
   expect_no_error(skipTrack.diagnostics(foo, 'cijs'))
 })

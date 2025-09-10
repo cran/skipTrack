@@ -33,7 +33,7 @@
 #'
 #' #Get diagnostics for cijs
 #' skipTrack.diagnostics(modFit, 'cijs')
-skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gammas', 'muis', 'tauis', 'cijs'),
+skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gammas', 'tauis', 'cijs'),
                                   proximityMap = NULL, ...){
   #If class is skipTrack.model, extract chains, otherwise assume we have chains
   if('skipTrack.model' %in% class(stFit)){
@@ -124,12 +124,12 @@ skipTrack.diagnostics <- function(stFit, param = c('rho', 'phi', 'Betas', 'Gamma
     return(genMCMCDiag::genDiagnostic(mcmcExt, proximityMap = proximityMap,
                                       distance = genMCMCDiag::hammingDist, ...))
 
-  }else if(param == 'muis'){
+  }else if(param == 'muijs'){
     #Extract muis
     mcmcExt <- lapply(stFit, function(chain){
       #Get list of mui draws
       draws <- lapply(chain, function(d){
-        return(d$iDat$mus)
+        return(d$ijDat$muijs)
       })
 
       #Return in expected format

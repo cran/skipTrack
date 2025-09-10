@@ -32,6 +32,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ys", "cijs", 'taus',
 #' @export
 #'
 skipTrack.visualize <- function(stFit){
+  #Get data results
+  stDat <- stFit$data
   #Get fit results
   stFit <- stFit$fit
 
@@ -78,32 +80,21 @@ skipTrack.visualize <- function(stFit){
 
   #Creates a dataframe with chain/draw specific muis and tauis
   iList <- lapply(1:length(stFit), function(chainI){
-    chainImus <- lapply(1:length(stFit[[chainI]]), function(t){
-      mus <- stFit[[chainI]][[t]]$iDat$mus
-      return(mus)
-    })
     chainItaus <- lapply(1:length(stFit[[chainI]]), function(t){
       taus <- stFit[[chainI]][[t]]$iDat$taus
       return(taus)
     })
-    chainImus <- rowMeans(do.call('cbind', chainImus))
     chainItaus <- rowMeans(do.call('cbind', chainItaus))
     chainIiDF <- stFit[[chainI]][[1]]$iDat
-    chainIiDF$mus <- chainImus
     chainIiDF$taus <- chainItaus
     chainIiDF$chain <- chainI
     return(chainIiDF)
   })
-  overallmuis <- lapply(iList, function(chain){
-    return(chain$mus)
-  })
   overalltauis <- lapply(iList, function(chain){
     return(chain$taus)
   })
-  overallmuis <- rowMeans(do.call('cbind', overallmuis))
   overalltauis <- rowMeans(do.call('cbind', overalltauis))
   iOverDF <- iList[[1]]
-  iOverDF$mus <- overallmuis
   iOverDF$taus <- overalltauis
   iOverDF$chain <- NULL
 
@@ -138,6 +129,8 @@ skipTrack.visualize <- function(stFit){
     return(iOverDF$taus[iOverDF$Individual == ind])
   })
 
+  cijOverDF$ys <- stDat$Y
+
   cijChainDF <- do.call('rbind', ijList)
 
   ################
@@ -150,6 +143,7 @@ skipTrack.visualize <- function(stFit){
   cijOverLength <- cijOverLength + ggplot2::theme_minimal() + ggplot2::ggtitle('Estimated Cijs vs. Ys')
   cijOverLength <- cijOverLength + ggplot2::xlab('Reported Cycle Length') + ggplot2::ylab('Estimated Cij Values')
   cijOverLength <- cijOverLength + ggplot2::theme(plot.title = ggtext::element_textbox_simple())
+
 
   #Cijs vs tauis overall
   cijOverTaus <- ggplot2::ggplot(data = cijOverDF,

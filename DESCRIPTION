@@ -1,7 +1,7 @@
 Package: skipTrack
 Title: A Bayesian Hierarchical Model that Controls for Non-Adherence in
         Mobile Menstrual Cycle Tracking
-Version: 0.1.2
+Version: 0.2.0
 Authors@R: 
     person("Luke", "Duttweiler", , "lduttweiler@hsph.harvard.edu", role = c("aut", "cre", 'cph'),
            comment = c(ORCID = "0000-0002-0467-995X"))
@@ -20,9 +20,9 @@ Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-01-27 21:25:51 UTC; LukeDuttweiler
-Author: Luke Duttweiler [aut, cre, cph]
-    (<https://orcid.org/0000-0002-0467-995X>)
+Packaged: 2025-09-09 17:51:49 UTC; LukeDuttweiler
+Author: Luke Duttweiler [aut, cre, cph] (ORCID:
+    <https://orcid.org/0000-0002-0467-995X>)
 Maintainer: Luke Duttweiler <lduttweiler@hsph.harvard.edu>
 Repository: CRAN
-Date/Publication: 2025-01-27 21:50:02 UTC
+Date/Publication: 2025-09-10 06:40:08 UTC

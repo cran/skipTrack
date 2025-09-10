@@ -34,8 +34,14 @@
 #'
 #' @export
 skipTrack.results <- function(stFit, trueVals = NULL, burnIn = 750){
+  stObj <- stFit
   #Get fit results
   stFit <- stFit$fit
+
+  #Check to make sure burnIn is less than number of draws
+  if(burnIn >= length(stFit[[1]])){
+    stop('burnIn parameter is ', burnIn, '. Must be less than number of draws which is ', length(stFit[[1]]), '.')
+  }
 
   #Creates a dataframe with chain/draw specific betas and gammas
   betaDF <- lapply(1:length(stFit), function(chainI){
@@ -136,6 +142,10 @@ skipTrack.results <- function(stFit, trueVals = NULL, burnIn = 750){
                       check.names = FALSE))
   })
   diags <- do.call('rbind', diags)
+
+  #Make sure names pass through as well
+  betaQuants$Variable <- c('(Intercept)', colnames(stObj$data$X)[-1])
+  gammaQuants$Variable <- c('(Intercept)', colnames(stObj$data$Z)[-1])
 
   return(list('Betas' = betaQuants,
               'Gammas' = gammaQuants,

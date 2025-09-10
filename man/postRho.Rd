@@ -4,18 +4,16 @@
 \alias{postRho}
 \title{Sample a value from the full conditional posterior of rho}
 \usage{
-postRho(muI, xib)
+postRho(b)
 }
 \arguments{
-\item{muI}{Numeric vector, log of individuals mean values.}
-
-\item{xib}{Numeric vector, result of X \%*\% Beta, same length as muI.}
+\item{b}{Numeric vector, Random intercepts for individuals}
 }
 \value{
 Numeric
 }
 \description{
-In our model the data are drawn from LogN(mu_i + log(c_ij), tau_i). The prior for mu_i
-is given as N(mu, rho). This function draws from the conditional posterior of rho, given
+In our model the data are drawn from LogN(mu_ij + log(c_ij), tau_i). mu_ij = Xi^T \%*\%Beta + bi, where the prior
+for bi is given as N(0, rho). This function draws from the conditional posterior of rho, given
 that the prior on rho is a uniform prior on the standard deviation.
 }

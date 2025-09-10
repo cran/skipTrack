@@ -4,12 +4,12 @@
 \alias{postGamma}
 \title{Perform a Metropolis-Hastings Step for Drawing a New Gamma}
 \usage{
-postGamma(taui, Zi, currentGamma, phi = 1, rhoGamma = 1000)
+postGamma(taui, Z, currentGamma, phi = 1, rhoGamma = 1000)
 }
 \arguments{
 \item{taui}{A vector of length num_Individuals representing precision parameters for individuals.}
 
-\item{Zi}{A matrix of covariates, where each row represents an individual and each column represents a covariate.}
+\item{Z}{A matrix of covariates, where each row represents an individual and each column represents a covariate.}
 
 \item{currentGamma}{A vector (or matrix with 1 row) representing the current Gamma value.}
 

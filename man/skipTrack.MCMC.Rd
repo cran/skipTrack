@@ -13,10 +13,10 @@ skipTrack.MCMC(
   reps = 1000,
   fixedSkips = FALSE,
   initialParams = list(pi = rep(1/(numSkips + 1), numSkips + 1), muis = rep(log(30),
-    length(unique(cluster))), tauis = rep(5, length(unique(cluster))), rho = 1, cijs =
-    sample(1:3, length(Y), replace = TRUE), alphas = rep(1, numSkips + 1), Beta =
-    matrix(rep(0, ncol(as.matrix(X))), 1), Gamma = matrix(rep(0, ncol(as.matrix(Z))), 1),
-    rhoBeta = 0.01, rhoGamma = 1000, phi = 0.01, rhoPhi = 1000),
+    length(unique(cluster))), tauis = rep(5, length(unique(cluster))), bs = rep(0,
+    length(unique(cluster))), rho = 1, cijs = rep(1, length(Y)), alphas = rep(1, numSkips
+    + 1), Beta = matrix(rep(0, ncol(as.matrix(X))), 1), Gamma = matrix(rep(0,
+    ncol(as.matrix(Z))), 1), rhoBeta = 0.01, rhoGamma = 1000, phi = 0.01, rhoPhi = 1000),
   verbose = FALSE
 )
 }
@@ -49,7 +49,7 @@ in the list is itself a list containing:
 \item{rho}{Updated value of the global parameter rho.}
 \item{pi}{Updated value of the global parameter pi.}
 \item{Xi}{Matrix of covariates for cycle length mean.}
-\item{Zi}{Matrix of covariates for cycle length precision.}
+\item{Z}{Matrix of covariates for cycle length precision.}
 \item{Beta}{Updated matrix of coefficients for cycle length mean.}
 \item{Gamma}{Updated matrix of coefficients for cycle length precision.}
 \item{priorAlphas}{Vector of prior alpha values for updating pi.}

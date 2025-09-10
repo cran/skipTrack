@@ -1,28 +1,46 @@
 #This document holds all of the functions that provide random draws from full conditional
-#posteriors for the 'duttweiler' algorithm.
+#posteriors for the skipTrack algorithm.
 
 #' Draw from Posterior Distribution for Beta Parameters
 #'
-#' In our model mui follows a normal distribution with mean Xi^T %*% beta and precision rho. Additionally
-#' we assume that beta follows a mvnormal prior with mean 0 and precision (rho_Beta) * I.This function draws
-#' from the posterior distribution of beta under these assumptions.
+#' In our model, \code{mui} follows a normal distribution with mean \eqn{X_{i}^{T} \beta + b_{i}} and precision \eqn{tau_i}.
+#' Additionally, we assume that \code{beta} follows a multivariate normal prior with mean 0 and precision \eqn{rhoBeta \cdot I}.
+#' This function draws from the posterior distribution of \code{beta} under these assumptions.
 #'
 #' @param rhoBeta A scalar representing the prior precision parameter for beta.
-#' @param rho A scalar representing the precision parameter.
-#' @param Xi A matrix of covariates, where each row represents an individual and each column represents a covariate.
-#' @param muI A vector where each element is the mean for individual i.
-#' @return A vector representing a draw from the posterior distribution of beta parameters.
+#' @param X A matrix of covariates, where each row represents a cycle and each column represents a covariate.
+#' @param b A vector where each element is the random effect/intercept for individual \code{i}.
+#' @param m A vector of observed means (\code{mui}) for each cycle.
+#' @param tau A vector where each element is the precision for individual \code{i} (length = number of individuals).
+#' @param indFirst An logical vector (length = number of individuals); each entry is TRUE if this is the first cycle for that individual in the vector of observations. Used to identify submatrices of X and m.
 #'
-#' @details This function assumes that \code{Xi} is a (num Individuals) x (dimension of beta) matrix of covariates.
+#' @return A numeric vector representing a draw from the posterior distribution of beta parameters.
 #'
-postBeta <- function(rhoBeta = .01, rho, Xi, muI){
-  #Assuming Xi is (num Individuals)x(dimension of beta) matrix of covariates
-  XTX <- t(Xi) %*% Xi
-  Xmu <- t(Xi) %*% muI
+#' @details
+#' For each individual, the function extracts the relevant rows of \code{X} and \code{m} using \code{indFirst}, and multiplies by the individual's precision \code{tau[i]}. It then computes the updated posterior precision and mean for \code{beta} and returns a sample from the resulting multivariate normal distribution. Requires the \code{mvtnorm} package.
+#'
+postBeta <- function(rhoBeta = .01, X, b, m, tau, indFirst){
+  #Assuming X is (num cycles)x(dimension of beta) matrix of covariates
+  ind <- cumsum(indFirst) #Variables to identify individuals for sub matrices
 
-  postPre <- (rhoBeta)*diag(1, dim(XTX)[1]) + rho*XTX
+  #Extract Xi matrices from X
+  Xi <- lapply(1:max(ind), function(i){
+    Xi <- X[ind == i,,drop = F]
+  })
+
+  #Build XTX matrices
+  XTXs <- lapply(1:max(ind), function(i){
+    tau[i]*t(Xi[[i]]) %*% Xi[[i]]
+  })
+
+  #Build other sum in mean
+  meanSums <- lapply(1:max(ind), function(i){
+    tau[i] * t(Xi[[i]]) %*% (m[ind == i] - rep(b[i], sum(ind == i)))
+  })
+
+  postPre <- (rhoBeta)*diag(1, dim(XTXs[[1]])[1]) +  Reduce('+', XTXs)
   postVar <- solve(postPre)
-  postMean <- postVar %*% (rho*Xmu)
+  postMean <- postVar %*% Reduce('+', meanSums)
 
   return(mvtnorm::rmvnorm(1, mean = postMean, postVar))
 }
@@ -35,7 +53,7 @@ postBeta <- function(rhoBeta = .01, rho, Xi, muI){
 #' Metropolis-Hastings step with proposal distribution propGamma ~ MVNormal(currentGamma, rhoGamma*I)
 #'
 #' @param taui A vector of length num_Individuals representing precision parameters for individuals.
-#' @param Zi A matrix of covariates, where each row represents an individual and each column represents a covariate.
+#' @param Z A matrix of covariates, where each row represents an individual and each column represents a covariate.
 #' @param currentGamma A vector (or matrix with 1 row) representing the current Gamma value.
 #' @param phi A scalar, the prior rate for tau_i.
 #' @param rhoGamma A scalar representing the proposal distribution precision parameter.
@@ -44,7 +62,7 @@ postBeta <- function(rhoBeta = .01, rho, Xi, muI){
 #'
 #' @return A list containing the new Gamma value and the corresponding thetai values.
 #'
-postGamma <- function(taui, Zi, currentGamma, phi = 1, rhoGamma = 1000){
+postGamma <- function(taui, Z, currentGamma, phi = 1, rhoGamma = 1000){
   #make sure things are formatted correctly
   currentGamma <- matrix(currentGamma, nrow = 1)
 
@@ -58,10 +76,10 @@ postGamma <- function(taui, Zi, currentGamma, phi = 1, rhoGamma = 1000){
                                 sigma = sig)
 
   #Calculate thetais under proposal and current, note we are using the log-link, not the canonical
-  propThetas <- Zi %*% t(propGamma)
+  propThetas <- Z %*% t(propGamma)
   propThetas <- exp(propThetas)
 
-  currentThetas <- Zi %*% t(currentGamma)
+  currentThetas <- Z %*% t(currentGamma)
   currentThetas <- exp(currentThetas)
 
   #Calculate qs
@@ -127,55 +145,43 @@ postPhi <- function(taui, thetai, currentPhi, rhoPhi = 1000){
 
 #' Sample a value from the full conditional posterior of rho
 #'
-#' In our model the data are drawn from LogN(mu_i + log(c_ij), tau_i). The prior for mu_i
-#' is given as N(mu, rho). This function draws from the conditional posterior of rho, given
+#' In our model the data are drawn from LogN(mu_ij + log(c_ij), tau_i). mu_ij = Xi^T %*%Beta + bi, where the prior
+#' for bi is given as N(0, rho). This function draws from the conditional posterior of rho, given
 #' that the prior on rho is a uniform prior on the standard deviation.
 #'
-#' @param muI Numeric vector, log of individuals mean values.
-#' @param xib Numeric vector, result of X %*% Beta, same length as muI.
+#' @param b Numeric vector, Random intercepts for individuals
 #'
 #' @return Numeric
 #'
-postRho <- function(muI, xib){
-  #n is the length of muI
-  n <- length(muI)
+postRho <- function(b){
+  #n is the length of b
+  n <- length(b)
 
   #Set posterior parameters
   postA <- (n-1)/2
-  postB <- sum((muI - xib)^2)/2
+  postB <- sum(b^2)/2
 
   #Draw value for rho and return
   return(rgamma(1, shape = postA, rate = postB))
 }
 
-#' Sample a value from the full conditional posterior of mu_i
+#' Sample a value from the full conditional posterior of b_i
 #'
-#' In our model the data are drawn from LogN(mu_i + log(c_ij), tau_i). The prior for mu_i
-#' is given as N(x_i^T %*% beta, rho). This function draws from the conditional posterior of mu_i.
+#' @param taui Numeric, tau_i for individual i
+#' @param mi Numeric vector, length equal to the number of cycles contributed by individual i
+#' @param XiBeta Numeric vector, equal to t(X_i) %*% Beta
+#' @param rho Numeric, rho value for prior precision of b_i
 #'
-#' Additionally, note that in order to vectorize the remainder of the MCMC algorithm
-#' this function returns the sampled value repeated for length(yij)
-#'
-#' @param yij Numeric vector, cycle lengths for a single individual
-#' @param cij Positive Integer vector, a sampled vector of length(yij) where the corresponding
-#'  values in cij indicate a sampled number of TRUE cycles in each cycle length given by yij
-#' @param taui Numeric > 0, A sampled precision for the yijs
-#' @param xib Numeric, result of multiplying x_i^T %*% beta (single value, not vector)
-#' @param rho Numeric > 0, sampled prior precision of mu_i
-#'
-#' @return Numeric vector, repeated sampled value of length(yij)
-#'
-postMui <- function(yij, cij, taui, xib, rho){
-  #Ni is the length of yij
-  Ni <- length(yij)
+#' @return Numeric value, single draw of bi
+postB <- function(taui, mi, XiBeta, rho){
+  #Number of cycles for individual i
+  ni <- length(mi)
 
-  #Set posterior mean and precision
-  postPre <- Ni*taui + rho
-  postMean <- (rho*xib + taui*sum(log(yij/cij)))/postPre
+  #Calculate posterior parameters
+  postPrec <- (rho + ni*taui)
+  postMean <- taui*sum(mi - XiBeta)/postPrec
 
-  #Draw from posterior and return
-  dr <- rnorm(1, mean = postMean, sd = sqrt(1/postPre))
-  return(rep(dr, Ni))
+  return(rnorm(1, postMean, sqrt(1/postPrec)))
 }
 
 #' Sample a value from the full conditional posterior of tau_i
@@ -205,7 +211,8 @@ postTaui <- function(yij, cij, mui, thetai, phi = 1){
 
   #Draw from posterior and return
   dr <- rgamma(1, shape = postA, rate = postB)
-  return(rep(dr, Ni))
+  #return(rep(dr, Ni))
+  return(dr)
 }
 
 #' Sample a vector of values from the full conditional posterior of the c_ij vector
